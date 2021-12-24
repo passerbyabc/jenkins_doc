@@ -16,7 +16,7 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
     jenkins/jenkins:latest
   ```
 - alyun 容器服务 - Kubernetes ack 解决方案
-  配置： (参考[阿里云ack](https://help.aliyun.com/document_detail/106712.html))
+  + 配置： (参考[阿里云ack](https://help.aliyun.com/document_detail/106712.html))
   在default命名空间下使用生成的config.json文件创建名为jenkins-docker-cfg的Secret
   解决：构建镜像前的私有镜像仓库权限验证问题。
   ```
@@ -25,6 +25,5 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
   # 创建Secret
   kubectl create secret generic jenkins-docker-cfg -n default --from-file=.docker/config.json
   ```
-  注意事项：
-  - 阿里云中应用市场创建的jenkins在配置cloud时，Pod Templates中jnlp用于连接Jenkins Master，在节点configureClouds配置时Pod Templates：jnlp的工作目录应该设置为/home/jenkins（~~/home/jenkins/agent~~）
+  注意事项：阿里云中应用市场创建的jenkins在配置cloud时，Pod Templates中jnlp用于连接Jenkins Master，在节点configureClouds配置时Pod Templates：jnlp的工作目录应该设置为/home/jenkins（~~/home/jenkins/agent~~）
 
