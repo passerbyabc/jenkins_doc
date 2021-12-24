@@ -25,5 +25,24 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
   # 创建Secret
   kubectl create secret generic jenkins-docker-cfg -n default --from-file=.docker/config.json
   ```
-  注意事项：阿里云中应用市场创建的jenkins在配置cloud时，Pod Templates中jnlp用于连接Jenkins Master，在节点configureClouds配置时Pod Templates：jnlp的工作目录应该设置为/home/jenkins（~~/home/jenkins/agent~~）
+  注意事项：
+  - 阿里云中应用市场创建的jenkins在配置cloud时，Pod Templates中jnlp用于连接Jenkins Master，在节点configureClouds配置时Pod Templates：jnlp的工作目录应该设置为/home/jenkins（~~/home/jenkins/agent~~）
+  - pipeline中的env赋值： BRANCH = "develop" , 使用则用"${BRANCH}"。如果使用'${BRANCH}',则会报错。
+    ```
+    stage('Git'){
+      steps{
+        git branch: "${BRANCH}", credentialsId: 'github_creds', url: 'https://github.com/passerbyabc/jenkins_doc.git'
+      }
+    }
+    ```
+  - 获取git版本号赋值给变量
+    ```
+    stage('Image Build And Publish'){
+      environment{
+        COMMIT_ID = sh(returnStdout: true,script: "git rev-parse --short HEAD").trim()
+        VERSION = "${MYTOOL_VERSION}.${BUILD_NUMBER}-${COMMIT_ID}"
+        IMAGE = "${IMAGE}:${VERSION}"
+      }
+    }
+    ```
 
