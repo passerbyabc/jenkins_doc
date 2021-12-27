@@ -42,9 +42,18 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
   - pipeline中的env赋值： BRANCH = "develop" ，请使用双引号，~~如果使用单引号,则会报错~~。
     ```
     //示例
+    environment{
+        // 将构建任务中的构建参数转换为环境变量
+				//IMAGE = sh(returnStdout: true,script: 'echo registry.$image_region.aliyuncs.com/$imag_namespace/$image_reponame').trim()
+				IMAGE = "registry.cn-hangzhou.aliyuncs.com/demo/jenkins_doc"
+				BRANCH =  "main"
+				MYTOOL_VERSION = "1.0"
+				APP_NAME = "accounts"
+    }
+    
     stage('Git'){
       steps{
-        git branch: "${BRANCH}", credentialsId: 'gitee_creds', url: 'https://gitee.com/demo/demo.git'
+        git branch: "${BRANCH}", credentialsId: 'gitee_creds', url: 'https://github.com/passerbyabc/jenkins_doc.git'
       }
     }
     ```
@@ -55,6 +64,12 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
         COMMIT_ID = sh(returnStdout: true,script: "git rev-parse --short HEAD").trim()
         VERSION = "${MYTOOL_VERSION}.${BUILD_NUMBER}-${COMMIT_ID}"
         IMAGE = "${IMAGE}:${VERSION}"
+      }
+
+      steps{
+        container("kaniko") {
+          sh "kaniko -f `pwd`/Dockerfile -c `pwd` --destination=${IMAGE} --skip-tls-verify"
+        }
       }
     }
     ```
