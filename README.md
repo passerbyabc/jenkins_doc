@@ -43,12 +43,12 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
     ```
     //示例
     environment{
-        // 将构建任务中的构建参数转换为环境变量
-				//IMAGE = sh(returnStdout: true,script: 'echo registry.$image_region.aliyuncs.com/$imag_namespace/$image_reponame').trim()
-				IMAGE = "registry.cn-hangzhou.aliyuncs.com/demo/jenkins_doc"
-				BRANCH =  "main"
-				MYTOOL_VERSION = "1.0"
-				APP_NAME = "accounts"
+			// 将构建任务中的构建参数转换为环境变量
+			//IMAGE = sh(returnStdout: true,script: 'echo registry.$image_region.aliyuncs.com/$imag_namespace/$image_reponame').trim()
+			IMAGE = "registry.cn-hangzhou.aliyuncs.com/demo/jenkins_doc"
+			BRANCH =  "main"
+			MYTOOL_VERSION = "1.0"
+			APP_NAME = "accounts"
     }
     
     stage('Git'){
