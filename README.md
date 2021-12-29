@@ -73,5 +73,8 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
       }
     }
     ```
-
+## 参考
+- [env](https://stackoverflow.com/questions/53541489/updating-environment-global-variable-in-jenkins-pipeline-from-the-stage-level/53541813)
+- [kaniko](https://github.com/GoogleContainerTools/kaniko)
+- [阿里云ack](https://help.aliyun.com/document_detail/106712.html)
 
