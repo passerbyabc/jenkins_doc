@@ -37,36 +37,40 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
   ```
   kubectl create secret generic jenkins-docker-cfg -n default --from-file=.docker/config.json
   ```
-  注意事项：
+  注意事项：（[Jenkinfile](https://github.com/passerbyabc/jenkins_doc/blob/main/Jenkinsfile)）
   - 阿里云中应用市场创建的jenkins在配置cloud时，Pod Templates中jnlp用于连接Jenkins Master，在节点configureClouds配置时Pod Templates：jnlp的工作目录应该设置为/home/jenkins（~~/home/jenkins/agent~~）
   - pipeline中的env赋值： BRANCH = "develop" ，请使用双引号，~~如果使用单引号,则会报错~~。
     ```
-    //示例
     environment{
-			// 将构建任务中的构建参数转换为环境变量
-			//IMAGE = sh(returnStdout: true,script: 'echo registry.$image_region.aliyuncs.com/$imag_namespace/$image_reponame').trim()
-			IMAGE = "registry.cn-hangzhou.aliyuncs.com/demo/jenkins_doc"
-			BRANCH =  "main"
-			MYTOOL_VERSION = "1.0"
-			APP_NAME = "accounts"
+      BRANCH =  "main"
+      GIT_URL = "https://github.com/passerbyabc/jenkins_doc.git"
+
+      //将构建任务中的构建参数转换为环境变量
+      //IMAGE = sh(returnStdout: true,script: 'echo registry.$image_region.aliyuncs.com/$imag_namespace/$image_reponame').trim()
+      IMAGE = "registry.xxxxx.aliyuncs.com/repo/demo"
+      APP_NAME = "demo"
+      VERSION = "1.0"
     }
-    
+		
+		
+    //克隆源码
     stage('Git'){
       steps{
-        git branch: "${BRANCH}", credentialsId: 'gitee_creds', url: 'https://github.com/passerbyabc/jenkins_doc.git'
+        git branch: "${BRANCH}", credentialsId: 'github_creds', url: "${GIT_URL}"
       }
     }
     ```
+		
   - 获取git版本号赋值给变量
     ```
+    // 添加第三个stage, 运行容器镜像构建和推送命令， 用到了environment中定义的groovy环境变量
     stage('Image Build And Publish'){
-      environment{
-        COMMIT_ID = sh(returnStdout: true,script: "git rev-parse --short HEAD").trim()
-        VERSION = "${MYTOOL_VERSION}.${BUILD_NUMBER}-${COMMIT_ID}"
-        IMAGE = "${IMAGE}:${VERSION}"
-      }
-
       steps{
+        script{
+            commit_id = sh(returnStdout: true,script: "git rev-parse --short HEAD").trim()
+            IMAGE = "${IMAGE}:${VERSION}.${BUILD_NUMBER}-${commit_id}"
+        }
+          
         container("kaniko") {
           sh "kaniko -f `pwd`/Dockerfile -c `pwd` --destination=${IMAGE} --skip-tls-verify"
         }
