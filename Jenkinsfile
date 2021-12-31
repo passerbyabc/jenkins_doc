@@ -46,9 +46,15 @@ pipeline{
       steps {
         echo "deploy: ${IMAGE}"
         container('kubectl') {
-          sh "sed -i 's#IMAGE#${IMAGE}#g' application.yaml"
-          sh "sed -i 's#APP_NAME#${APP_NAME}#g' application.yaml"
-          sh "kubectl apply -f  application.yaml"
+          // k8s无APP_NAME对应的pod则创建，有则只更新镜像名称 此处也可以使用jenkins自带的逻辑处理
+          sh """if kubectl get deployment/${APP_NAME} -n dmos
+                then
+                  kubectl set image deployment ${APP_NAME} ${APP_NAME}=${IMAGE}
+                else
+                  sed -i -e 's#IMAGE#${IMAGE}#g' -e 's#APP_NAME#${APP_NAME}#g' application.yaml
+                  kubectl apply -f  application.yaml
+                fi
+            """
         }
       }
     }
