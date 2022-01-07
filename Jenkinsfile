@@ -9,6 +9,8 @@ pipeline{
      IMAGE = "registry.xxxxx.aliyuncs.com/repo/demo"
      APP_NAME = "demo"
      VERSION = "1.0"
+  
+     GITHUB_CREDS = credentials('github_creds')
   }
 
   // 定义本次构建使用哪个标签的构建环境，本示例中为 “slave-pipeline”
@@ -36,6 +38,8 @@ pipeline{
         }
           
         container("kaniko") {
+          // 构建过程中Get私有库时，使用用户名和密码登陆git私有仓库。
+          sh "echo \"machine github.com login ${GITHUB_CREDS_USR} password ${GITHUB_CREDS_PSW}\" > ~/.netrc"
           sh "kaniko -f `pwd`/Dockerfile -c `pwd` --destination=${IMAGE} --skip-tls-verify"
         }
       }
@@ -47,9 +51,9 @@ pipeline{
         echo "deploy: ${IMAGE}"
         container('kubectl') {
           // k8s无APP_NAME对应的pod则创建，有则只更新镜像名称 此处也可以使用jenkins自带的逻辑处理
-          sh """if kubectl get deployment/${APP_NAME} -n dmos
+          sh """if kubectl get deployment/${APP_NAME} -n namespase
                 then
-                  kubectl set image deployment ${APP_NAME} ${APP_NAME}=${IMAGE}
+                  kubectl set image deployment ${APP_NAME} ${APP_NAME}=${IMAGE} -n namespase
                 else
                   sed -i -e 's#IMAGE#${IMAGE}#g' -e 's#APP_NAME#${APP_NAME}#g' application.yaml
                   kubectl apply -f  application.yaml
