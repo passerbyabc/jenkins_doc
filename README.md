@@ -50,6 +50,8 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
       IMAGE = "registry.xxxxx.aliyuncs.com/repo/demo"
       APP_NAME = "demo"
       VERSION = "1.0"
+      
+      GITHUB_CREDS = credentials('github_creds')
     }
 		
 		
@@ -72,6 +74,8 @@ Got permission denied while trying to connect to the Docker daemon socket at uni
         }
           
         container("kaniko") {
+          // 构建过程中Get私有库时，使用用户名和密码登陆git私有仓库。
+          sh "echo \"machine github.com login ${GITHUB_CREDS_USR} password ${GITHUB_CREDS_PSW}\" > ~/.netrc"
           sh "kaniko -f `pwd`/Dockerfile -c `pwd` --destination=${IMAGE} --skip-tls-verify"
         }
       }
